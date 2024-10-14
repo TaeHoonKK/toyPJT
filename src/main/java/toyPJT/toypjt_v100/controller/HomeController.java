@@ -1,4 +1,4 @@
-package toyPJT.controller;
+package toyPJT.toypjt_v100.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
