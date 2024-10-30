@@ -2,10 +2,182 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>First Screen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Management</title>
+    <style>
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: top;
+        }
+        .date-cell {
+            font-weight: bold;
+        }
+        .add-button, .task-item {
+            font-size: 12px;
+            cursor: pointer;
+            color: blue;
+            background: none;
+            border: none;
+            text-decoration: none; /* Remove underline */
+        }
+        .task-check {
+            margin-left: 10px;
+        }
+        /* Popup styling */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .popup {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+        .popup input[type="text"] {
+            width: 90%;
+            padding: 5px;
+            margin: 10px 0;
+        }
+        .popup button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function formatDate(date) {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${month}/${day}`;
+        }
+
+        function loadDates() {
+            const today = new Date();
+            const dates = [];
+
+            for (let i = -3; i <= 3; i++) {
+                const currentDate = new Date(today);
+                currentDate.setDate(today.getDate() + i);
+                dates.push(formatDate(currentDate));
+            }
+
+            const dateHeaders = document.querySelectorAll('.date-header');
+            dateHeaders.forEach((header, index) => {
+                header.innerHTML = `${dates[index]} <button class="add-button" onclick="openAddPopup('${dates[index]}')">(+)</button>`;
+            });
+        }
+
+        function openAddPopup(date) {
+            document.getElementById('popupTitle').innerText = `Add Task for ${date}`;
+            document.getElementById('popup').style.display = 'flex';
+            document.getElementById('popup').setAttribute('data-action', 'add');
+        }
+
+        function openEditPopup(event, task) {
+            event.stopPropagation(); // Prevent checkbox click from triggering the popup
+            document.getElementById('popupTitle').innerText = `Edit Task: ${task}`;
+            document.getElementById('popup').style.display = 'flex';
+            document.getElementById('popup').setAttribute('data-action', 'edit');
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('taskInput').value = '';
+        }
+
+        function handlePopupAction() {
+            const action = document.getElementById('popup').getAttribute('data-action');
+            const taskInput = document.getElementById('taskInput').value;
+
+            if (action === 'add') {
+                alert(`Task added: ${taskInput}`);
+            } else if (action === 'edit') {
+                alert(`Task edited: ${taskInput}`);
+            }
+            closePopup();
+        }
+
+        function deleteTask() {
+            alert('Task deleted');
+            closePopup();
+        }
+
+        window.onload = loadDates;
+    </script>
 </head>
 <body>
-    <h1>빅 보이 이상준</h1>
-    <img src="/IMG_7022.jpg" width="600" height="600">
+
+<h2>재미로 만든 일정관리표(by.TH)</h2>
+
+<table class="schedule-table">
+    <thead>
+    <tr>
+        <th class="date-cell date-header"></th>
+        <th class="date-cell date-header"></th>
+        <th class="date-cell date-header"></th>
+        <th class="date-cell date-header"></th>
+        <th class="date-cell date-header"></th>
+        <th class="date-cell date-header"></th>
+        <th class="date-cell date-header"></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            <div class="task-item" onclick="openEditPopup(event, '방문객')">방문객
+                <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()">
+            </div>
+            <div class="task-item" onclick="openEditPopup(event, '동행자')">동행자
+                <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()">
+            </div>
+        </td>
+        <td><div class="task-item" onclick="openEditPopup(event, '공부')">공부
+            <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()"></div></td>
+        <td><div class="task-item" onclick="openEditPopup(event, '자기')">자기
+            <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()"></div></td>
+        <td>
+            <div class="task-item" onclick="openEditPopup(event, '영화')">영화
+                <input type="checkbox" class="task-check" onclick="event.stopPropagation()">
+            </div>
+            <div class="task-item" onclick="openEditPopup(event, '노래')">노래
+                <input type="checkbox" class="task-check" onclick="event.stopPropagation()">
+            </div>
+        </td>
+        <td><div class="task-item" onclick="openEditPopup(event, '영화')">영화
+            <input type="checkbox" class="task-check" onclick="event.stopPropagation()"></div></td>
+        <td></td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Popup for Adding/Editing Task -->
+<div id="popup" class="popup-overlay" onclick="event.target === this && closePopup()">
+    <div class="popup">
+        <h3 id="popupTitle">Popup Title</h3>
+        <input type="text" id="taskInput" placeholder="Enter task name">
+        <div id="popupButtons">
+            <button onclick="handlePopupAction()">Save</button>
+            <button onclick="deleteTask()" id="deleteButton">Delete</button>
+            <button onclick="closePopup()">Cancel</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
