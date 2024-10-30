@@ -16,8 +16,9 @@ public class TodoService {
     private final TodoRepository todoRepository;
 
     @Transactional
-    public void saveTodo(Todo todo){
+    public Long saveTodo(Todo todo){
         todoRepository.save(todo);
+        return todo.getId();
     }
 
     @Transactional

@@ -17,7 +17,7 @@ public class Apicontroller {
     @GetMapping("/todo/selectAll")
     public List<Todo> findTodos(){
         Todo todo = new Todo();
-        todo.setContent("Sleep");
+        todo.setContent("sleep");
         todo.setCompleteYn("N");
 
         todoService.saveTodo(todo);
