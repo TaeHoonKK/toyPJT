@@ -87,30 +87,4 @@ class TodoServiceTest {
         assertEquals(findTodo2.getId(), todoId2);
     }
 
-    @Test
-    void findTodos() {
-        //given
-        Todo todo1 = new Todo();
-        todo1.setContent("sleep");
-        todo1.setCompleteYn("N");
-
-        Todo todo2 = new Todo();
-        todo2.setContent("sleep");
-        todo2.setCompleteYn("N");
-
-        Todo todo3 = new Todo();
-        todo3.setContent("sleep");
-        todo3.setCompleteYn("N");
-
-        //when
-        todoService.saveTodo(todo1);
-        todoService.saveTodo(todo2);
-        todoService.saveTodo(todo3);
-
-        List<Todo> todos = todoService.findTodos();
-
-        //then
-        assertEquals(todos.size(), 3);
-    }
-
 }

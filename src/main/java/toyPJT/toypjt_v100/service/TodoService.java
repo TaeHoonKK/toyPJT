@@ -24,6 +24,9 @@ public class TodoService {
     @Transactional
     public void updateTodo(Long id, String complYn, String content){
         Todo todo = todoRepository.findOne(id);
+        if(todo == null){
+            throw new IllegalArgumentException("not found : " + id);
+        }
         todo.setCompleteYn(complYn);
         todo.setContent(content);
     }
