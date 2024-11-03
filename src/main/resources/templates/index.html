@@ -174,8 +174,9 @@
                     checkbox.checked = task.completeYn == "Y" ? true : false;
                     checkbox.onclick = function (event) {
                         event.stopPropagation();
+                        checkboxEvent(task.id, checkbox, task.content);
                     };
-                    taskDiv.setAttribute('onclick', `openEditPopup(event, '${task.content}', '${task.id}', '${checkbox.checked}')`);
+                    taskDiv.setAttribute('onclick', `openEditPopup(event, '${task.content}', '${task.id}')`);
 
                     // 구성한 요소 추가
                     taskDiv.appendChild(checkbox);
@@ -239,12 +240,11 @@
             $("#deleteButton").hide();
         }
 
-        function openEditPopup(event, task, taskId, checked) {
+        function openEditPopup(event, task, taskId) {
             event.stopPropagation(); // Prevent checkbox click from triggering the popup
             document.getElementById('popupTitle').innerText = `Edit Task: ${task}`;
             document.getElementById('popup').style.display = 'flex';
             document.getElementById('popup').setAttribute('data-task-id', taskId); // 팝업에 id 저장
-            document.getElementById('popup').setAttribute('data-checked', checked);
             document.getElementById('popup').setAttribute('data-action', 'edit');
 
             $("#deleteButton").show();
@@ -291,6 +291,26 @@
                 data : JSON.stringify(data),
                 success: function (response) {
                     location.reload(true);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to load tasks:', error);
+                }
+            });
+        }
+
+        function checkboxEvent(id, checkbox, content){
+            const data = {
+                "todoId" : id,
+                "content" : content,
+                "completeYn" : checkbox.checked == true ? "Y" : "N"
+            };
+
+            $.ajax({
+                url: '/todo/editTodo',
+                method: 'PUT',
+                contentType : "application/json",
+                data : JSON.stringify(data),
+                success: function (response) {
                 },
                 error: function (xhr, status, error) {
                     console.error('Failed to load tasks:', error);
