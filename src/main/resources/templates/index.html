@@ -5,31 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schedule Management</title>
     <style>
+        /* 전체 테이블 스타일 */
         .schedule-table {
             width: 100%;
             border-collapse: collapse;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
         }
         .schedule-table th, .schedule-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 12px;
             text-align: center;
             vertical-align: top;
+            font-size: 14px;
+            color: #333;
         }
         .date-cell {
             font-weight: bold;
+            color: #007aff; /* iOS-style blue for date cells */
         }
+
+        /* 버튼 및 텍스트 스타일 */
         .add-button, .task-item {
-            font-size: 12px;
+            font-size: 14px;
             cursor: pointer;
-            color: blue;
+            color: #007aff;
             background: none;
             border: none;
-            text-decoration: none; /* Remove underline */
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 8px;
+            padding: 2px 6px;
+            margin: 2px;
+            transition: background-color 0.2s ease;
         }
+        .add-button:hover, .task-item:hover {
+            background-color: #f0f0f5;
+        }
+
+        .task-item {
+            display: block; /* 세로로 쌓이도록 설정 */
+            margin-bottom: 5px; /* 각 태스크 간의 간격 조정 */
+        }
+
+
+        /* 체크박스 스타일 */
         .task-check {
+            appearance: none;
+            background-color: #f0f0f5;
             margin-left: 10px;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            display: inline-block;
+            vertical-align: middle;
+            transition: background-color 0.3s, border-color 0.3s;
         }
-        /* Popup styling */
+        .task-check:checked {
+            background-color: #007aff;
+            border-color: #007aff;
+        }
+        .task-check:checked::before {
+            content: '✔';
+            color: #fff;
+            font-size: 14px;
+            position: absolute;
+            top: -1px;
+            left: 1px;
+        }
+
+        /* 팝업 오버레이 스타일 */
         .popup-overlay {
             display: none;
             position: fixed;
@@ -37,29 +82,130 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
+
+        /* 팝업 스타일 */
         .popup {
             background: #fff;
             padding: 20px;
-            border-radius: 5px;
-            width: 300px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 320px;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .popup h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
         }
         .popup input[type="text"] {
-            width: 90%;
-            padding: 5px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
             margin: 10px 0;
+            font-size: 14px;
+            box-sizing: border-box;
         }
         .popup button {
             margin: 5px;
-            padding: 5px 10px;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #007aff;
+            background: #f0f0f5;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .popup button:hover {
+            background-color: #e0e0e5;
+        }
+        .popup button#saveButton {
+            color: #fff;
+            background-color: #007aff;
+        }
+        .popup button#saveButton:hover {
+            background-color: #005bb5;
         }
     </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        function loadTasksWithDateComparison(tasks) {
+            const dateHeaders = Array.from(document.querySelectorAll('.date-header'));
+            const dateMap = dateHeaders.reduce((map, header, index) => {
+                const dateText = header.textContent.split(" ")[0]; // "MM/DD" 형식 추출
+                map[dateText] = index;
+                return map;
+            }, {});
+
+            const taskBody = document.getElementById('task-body');
+            taskBody.innerHTML = '';  // 기존 내용을 지우고 새로 채움
+
+            // 첫 번째 행 생성 및 7개의 셀 추가
+            let firstRow = document.createElement('tr');
+            for (let i = 0; i < 7; i++) {
+                firstRow.insertCell();
+            }
+
+            // 서버에서 받아온 데이터로 각 날짜에 맞게 태스크를 배치
+            tasks.forEach(task => {
+                const taskDate = formatDate(new Date(task.createdDate)); // task.time이 "MM/DD" 형식이라 가정
+                if (dateMap[taskDate] !== undefined) {
+                    const cellIndex = dateMap[taskDate]; // 해당 날짜에 해당하는 셀의 인덱스
+                    const cell = firstRow.cells[cellIndex]; // 첫 번째 행의 셀을 가져옴
+
+                    // task-item 생성
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task-item';
+                    taskDiv.textContent = task.content;
+                    taskDiv.setAttribute('data-task-id', task.id); // 히든 속성으로 id 저장
+
+                    // 체크박스 추가
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'task-check';
+                    checkbox.checked = task.completeYn == "Y" ? true : false;
+                    checkbox.onclick = function (event) {
+                        event.stopPropagation();
+                    };
+                    taskDiv.setAttribute('onclick', `openEditPopup(event, '${task.content}', '${task.id}', '${checkbox.checked}')`);
+
+                    // 구성한 요소 추가
+                    taskDiv.appendChild(checkbox);
+                    cell.appendChild(taskDiv);
+                }
+            });
+
+            // 수정된 첫 번째 행을 taskBody에 추가
+            taskBody.appendChild(firstRow);
+        }
+
+
+        function selectTodo() {
+            $.ajax({
+                url: '/todo/selectAll',
+                method: 'GET',
+                success: function (response) {
+                    loadTasksWithDateComparison(response);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to load tasks:', error);
+                }
+            });
+        }
+
+
+        function init(){
+            selectTodo();
+        }
+
         function formatDate(date) {
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
@@ -80,19 +226,28 @@
             dateHeaders.forEach((header, index) => {
                 header.innerHTML = `${dates[index]} <button class="add-button" onclick="openAddPopup('${dates[index]}')">(+)</button>`;
             });
+
+            init();
         }
 
         function openAddPopup(date) {
             document.getElementById('popupTitle').innerText = `Add Task for ${date}`;
             document.getElementById('popup').style.display = 'flex';
             document.getElementById('popup').setAttribute('data-action', 'add');
+            document.getElementById('popup').setAttribute('data-date', date); // 팝업에 id 저장
+
+            $("#deleteButton").hide();
         }
 
-        function openEditPopup(event, task) {
+        function openEditPopup(event, task, taskId, checked) {
             event.stopPropagation(); // Prevent checkbox click from triggering the popup
             document.getElementById('popupTitle').innerText = `Edit Task: ${task}`;
             document.getElementById('popup').style.display = 'flex';
+            document.getElementById('popup').setAttribute('data-task-id', taskId); // 팝업에 id 저장
+            document.getElementById('popup').setAttribute('data-checked', checked);
             document.getElementById('popup').setAttribute('data-action', 'edit');
+
+            $("#deleteButton").show();
         }
 
         function closePopup() {
@@ -100,21 +255,85 @@
             document.getElementById('taskInput').value = '';
         }
 
+        function addTodo(taskInput){
+            const data = {
+                "content" : taskInput,
+                "completeYn" : "N",
+                "createdDate" : document.getElementById('popup').getAttribute('data-date')
+            };
+
+            $.ajax({
+                url: '/todo/addTodo',
+                method: 'POST',
+                contentType : "application/json",
+                data : JSON.stringify(data),
+                success: function (response) {
+                    alert("성공적으로 등록하였습니다.");
+                    location.reload(true);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to load tasks:', error);
+                }
+            });
+        }
+
+        function updateTodo(taskInput){
+            const data = {
+                "todoId" : document.getElementById('popup').getAttribute('data-task-id'),
+                "content" : taskInput,
+                "completeYn" : document.getElementById('popup').getAttribute('data-checked') == true ? "Y" : "N",
+            };
+
+            $.ajax({
+                url: '/todo/editTodo',
+                method: 'PUT',
+                contentType : "application/json",
+                data : JSON.stringify(data),
+                success: function (response) {
+                    location.reload(true);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to load tasks:', error);
+                }
+            });
+        }
+
+        function deleteTodo(){
+            const id = document.getElementById('popup').getAttribute('data-task-id');
+
+            $.ajax({
+                url: '/todo/deleteTodo/' + id,
+                method: 'DELETE',
+                contentType : "application/json",
+                success: function (response) {
+                    location.reload(true);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to load tasks:', error);
+                }
+            });
+        }
+
         function handlePopupAction() {
             const action = document.getElementById('popup').getAttribute('data-action');
             const taskInput = document.getElementById('taskInput').value;
 
+            if(taskInput == null || taskInput == "") {
+                alert("메세지를 입력하세요.");
+                return;
+            }
+
             if (action === 'add') {
-                alert(`Task added: ${taskInput}`);
+                addTodo(taskInput);
             } else if (action === 'edit') {
-                alert(`Task edited: ${taskInput}`);
+                updateTodo(taskInput);
             }
             closePopup();
         }
 
         function deleteTask() {
-            alert('Task deleted');
             closePopup();
+            deleteTodo();
         }
 
         window.onload = loadDates;
@@ -136,33 +355,7 @@
         <th class="date-cell date-header"></th>
     </tr>
     </thead>
-    <tbody>
-    <tr>
-        <td>
-            <div class="task-item" onclick="openEditPopup(event, '방문객')">방문객
-                <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()">
-            </div>
-            <div class="task-item" onclick="openEditPopup(event, '동행자')">동행자
-                <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()">
-            </div>
-        </td>
-        <td><div class="task-item" onclick="openEditPopup(event, '공부')">공부
-            <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()"></div></td>
-        <td><div class="task-item" onclick="openEditPopup(event, '자기')">자기
-            <input type="checkbox" class="task-check" checked onclick="event.stopPropagation()"></div></td>
-        <td>
-            <div class="task-item" onclick="openEditPopup(event, '영화')">영화
-                <input type="checkbox" class="task-check" onclick="event.stopPropagation()">
-            </div>
-            <div class="task-item" onclick="openEditPopup(event, '노래')">노래
-                <input type="checkbox" class="task-check" onclick="event.stopPropagation()">
-            </div>
-        </td>
-        <td><div class="task-item" onclick="openEditPopup(event, '영화')">영화
-            <input type="checkbox" class="task-check" onclick="event.stopPropagation()"></div></td>
-        <td></td>
-        <td></td>
-    </tr>
+    <tbody id="task-body">
     </tbody>
 </table>
 
@@ -172,7 +365,7 @@
         <h3 id="popupTitle">Popup Title</h3>
         <input type="text" id="taskInput" placeholder="Enter task name">
         <div id="popupButtons">
-            <button onclick="handlePopupAction()">Save</button>
+            <button onclick="handlePopupAction()" id="saveButton">Save</button>
             <button onclick="deleteTask()" id="deleteButton">Delete</button>
             <button onclick="closePopup()">Cancel</button>
         </div>

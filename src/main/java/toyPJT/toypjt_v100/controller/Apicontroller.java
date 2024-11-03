@@ -20,15 +20,16 @@ public class Apicontroller {
     private final TodoService todoService;
 
     @GetMapping("/todo/selectAll")
-    public List<Todo> findTodos(){
-        return todoService.findTodos();
+    public ResponseEntity<List<Todo>>  findTodos(){
+        return ResponseEntity.ok().body(todoService.findTodos());
     }
 
     @PostMapping("/todo/addTodo")
-    public ResponseEntity<Todo> addTodo(todoDto tododto){
+    public ResponseEntity<Todo> addTodo(@RequestBody todoDto tododto){
         Todo todo = new Todo();
         todo.setContent(tododto.getContent());
         todo.setCompleteYn(tododto.getCompleteYn());
+        todo.setCreatedDate(tododto.getCreatedDate());
         todoService.saveTodo(todo);
 
         return ResponseEntity.ok()
@@ -36,7 +37,7 @@ public class Apicontroller {
     }
 
     @PutMapping("/todo/editTodo")
-    public ResponseEntity<Map<String, Object>> editTodo(todoDto todoDto){
+    public ResponseEntity<Map<String, Object>> editTodo(@RequestBody todoDto todoDto){
         try {
             todoService.updateTodo(todoDto.getTodoId(), todoDto.getCompleteYn(), todoDto.getContent());
         }catch (Exception ex){

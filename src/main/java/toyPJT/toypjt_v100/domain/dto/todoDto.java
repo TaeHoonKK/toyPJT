@@ -8,4 +8,5 @@ public class todoDto {
     private Long todoId;
     private String content;
     private String completeYn;
+    private String createdDate;
 }

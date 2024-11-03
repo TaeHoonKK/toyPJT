@@ -24,9 +24,7 @@ public class Todo {
 
     private String completeYn;
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdDate; // 등록일자
+    private String createdDate;
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDate; // 수정일자
