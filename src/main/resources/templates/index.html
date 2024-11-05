@@ -5,28 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schedule Management</title>
     <style>
-        /* 전체 테이블 스타일 */
+        /* 기본 테이블 스타일 */
         .schedule-table {
             width: 100%;
             border-collapse: collapse;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        }
-        .schedule-table th, .schedule-table td {
-            border: 1px solid #e0e0e0;
-            padding: 12px;
-            text-align: center;
-            vertical-align: top;
-            font-size: 14px;
-            color: #333;
-        }
-        .date-cell {
-            font-weight: bold;
-            color: #007aff; /* iOS-style blue for date cells */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
         }
 
-        /* 버튼 및 텍스트 스타일 */
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            text-align: center;
+            vertical-align: top;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .date-cell {
+            font-weight: bold;
+            color: #007aff; /* iOS 스타일 파란색 */
+        }
+
+        /* 버튼 및 태스크 항목 스타일 */
         .add-button, .task-item {
-            font-size: 14px;
+            font-size: 12px;
             cursor: pointer;
             color: #007aff;
             background: none;
@@ -52,29 +54,31 @@
         .task-check {
             appearance: none;
             background-color: #f0f0f5;
-            margin-left: 10px;
-            width: 18px;
-            height: 18px;
+            margin-left: 5px;
+            width: 16px;
+            height: 16px;
             border: 2px solid #e0e0e0;
             border-radius: 4px;
             display: inline-block;
             vertical-align: middle;
             transition: background-color 0.3s, border-color 0.3s;
         }
+
         .task-check:checked {
             background-color: #007aff;
             border-color: #007aff;
         }
+
         .task-check:checked::before {
             content: '✔';
             color: #fff;
-            font-size: 14px;
+            font-size: 12px;
             position: absolute;
-            top: -1px;
+            top: 0;
             left: 1px;
         }
 
-        /* 팝업 오버레이 스타일 */
+        /* 팝업 오버레이 */
         .popup-overlay {
             display: none;
             position: fixed;
@@ -82,7 +86,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -91,30 +95,32 @@
         /* 팝업 스타일 */
         .popup {
             background: #fff;
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
             width: 90%;
-            max-width: 320px;
+            max-width: 300px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
+
         .popup h3 {
-            font-size: 18px;
+            font-size: 16px;
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
+
         .popup input[type="text"] {
             width: 100%;
-            padding: 10px;
+            padding: 4px;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
             margin: 10px 0;
             font-size: 14px;
-            box-sizing: border-box;
         }
+
         .popup button {
             margin: 5px;
-            padding: 10px 15px;
+            padding: 8px 10px;
             font-size: 14px;
             color: #007aff;
             background: #f0f0f5;
@@ -123,17 +129,62 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
+
         .popup button:hover {
             background-color: #e0e0e5;
         }
+
         .popup button#saveButton {
             color: #fff;
             background-color: #007aff;
         }
+
         .popup button#saveButton:hover {
             background-color: #005bb5;
         }
+
+        /* 모바일 반응형 디자인 */
+        @media (max-width: 768px) {
+            .schedule-table {
+                width: auto;
+                overflow-x: auto; /* 테이블 스크롤 가능하게 설정 */
+                display: block;
+            }
+
+            .schedule-table th, .schedule-table td {
+                font-size: 10px;
+                padding: 4px;
+                min-width: 100px; /* 각 셀이 좁아지지 않도록 최소 너비 설정 */
+            }
+
+            .add-button, .task-item {
+                font-size: 10px;
+                padding: 1px 3px;
+            }
+
+            .popup {
+                width: 90%;
+                max-width: 280px;
+                padding-right: 20px; /* 오른쪽 여백 추가 */
+            }
+
+            .popup h3 {
+                font-size: 14px;
+            }
+
+            .popup input[type="text"] {
+                font-size: 12px;
+                padding: 4px;
+            }
+
+            .popup button {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+        }
+
     </style>
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
@@ -245,6 +296,10 @@
             document.getElementById('popupTitle').innerText = `Edit Task: ${task}`;
             document.getElementById('popup').style.display = 'flex';
             document.getElementById('popup').setAttribute('data-task-id', taskId); // 팝업에 id 저장
+
+            const checkbox = event.currentTarget.querySelector('.task-check');
+            const isChecked = checkbox.checked == true ? "Y" : "N";
+            document.getElementById('popup').setAttribute('data-checked', isChecked); // 팝업에 id 저장
             document.getElementById('popup').setAttribute('data-action', 'edit');
 
             $("#deleteButton").show();
@@ -281,7 +336,7 @@
             const data = {
                 "todoId" : document.getElementById('popup').getAttribute('data-task-id'),
                 "content" : taskInput,
-                "completeYn" : document.getElementById('popup').getAttribute('data-checked') == true ? "Y" : "N",
+                "completeYn" : document.getElementById('popup').getAttribute('data-checked')
             };
 
             $.ajax({
