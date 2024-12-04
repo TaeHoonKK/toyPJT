@@ -13,10 +13,10 @@ import toyPJT.toypjt_v100.repository.MemberRepository;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class MemberService implements UserDetailsService {
+public class MemberService{
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;  // PasswordEncoder 주입
 
     public void signup(String username, String password){
         // 비밀번호 암호화
@@ -28,16 +28,5 @@ public class MemberService implements UserDetailsService {
         member.setPassword(encodedPassword);
 
         memberRepository.save(member);
-    }
-
-    // 사용자 이름으로 사용자의 정보를 가져오는 메서드
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository.findByUsername(username);
-        if(member == null) {
-            throw new IllegalArgumentException(username);
-        }
-
-        return member;
     }
 }

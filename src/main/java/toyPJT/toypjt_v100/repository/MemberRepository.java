@@ -3,6 +3,7 @@ package toyPJT.toypjt_v100.repository;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import toyPJT.toypjt_v100.domain.Member;
 
@@ -34,14 +35,6 @@ public class MemberRepository {
     public List<Member> findAll(){
         return em.createQuery("select i from Member i", Member.class)
                 .getResultList();
-    }
-
-    public Member findOne(Long id){
-        return em.find(Member.class, id);
-    }
-
-    public Member findByUsername(String username){
-        return em.find(Member.class, username);
     }
 
 }
