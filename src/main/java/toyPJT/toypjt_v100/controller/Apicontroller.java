@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import toyPJT.toypjt_v100.domain.Member;
 import toyPJT.toypjt_v100.domain.Todo;
 import toyPJT.toypjt_v100.domain.dto.todoDto;
+import toyPJT.toypjt_v100.service.MemberService;
 import toyPJT.toypjt_v100.service.TodoService;
 
 import java.util.HashMap;
@@ -18,10 +20,12 @@ import java.util.Map;
 public class Apicontroller {
 
     private final TodoService todoService;
+    private final MemberService memberService;
 
     @GetMapping("/todo/selectAll")
     public ResponseEntity<List<Todo>>  findTodos(){
-        return ResponseEntity.ok().body(todoService.findTodos());
+        Member member = memberService.getLoggedInMember();
+        return ResponseEntity.ok().body(todoService.findByMember_id(member.getId()));
     }
 
     @PostMapping("/todo/addTodo")
@@ -30,6 +34,10 @@ public class Apicontroller {
         todo.setContent(tododto.getContent());
         todo.setCompleteYn(tododto.getCompleteYn());
         todo.setCreatedDate(tododto.getCreatedDate());
+
+        Member member = memberService.getLoggedInMember();
+        todo.setMember(member);
+
         todoService.saveTodo(todo);
 
         return ResponseEntity.ok()

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import toyPJT.toypjt_v100.domain.Todo;
 import toyPJT.toypjt_v100.repository.TodoRepository;
+import toyPJT.toypjt_v100.repository.TodoRepositoryImpl;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final TodoRepositoryImpl todoRepositoryimpl;
 
     @Transactional
     public Long saveTodo(Todo todo){
@@ -34,6 +36,10 @@ public class TodoService {
     @Transactional
     public void deleteTodo(Long id){
         todoRepository.delete(id);
+    }
+
+    public List<Todo> findByMember_id(Long member_id){
+        return todoRepositoryimpl.findByMember_id(member_id);
     }
 
     public List<Todo> findTodos(){

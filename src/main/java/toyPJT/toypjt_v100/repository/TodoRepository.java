@@ -38,5 +38,4 @@ public class TodoRepository {
     public Todo findOne(Long id){
         return em.find(Todo.class, id);
     }
-
 }
