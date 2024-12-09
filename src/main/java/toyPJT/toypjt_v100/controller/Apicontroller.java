@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import toyPJT.toypjt_v100.domain.Member;
 import toyPJT.toypjt_v100.domain.Todo;
+import toyPJT.toypjt_v100.domain.dto.selectDto;
 import toyPJT.toypjt_v100.domain.dto.todoDto;
 import toyPJT.toypjt_v100.service.MemberService;
 import toyPJT.toypjt_v100.service.TodoService;
@@ -13,6 +14,7 @@ import toyPJT.toypjt_v100.service.TodoService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -23,9 +25,21 @@ public class Apicontroller {
     private final MemberService memberService;
 
     @GetMapping("/todo/selectAll")
-    public ResponseEntity<List<Todo>>  findTodos(){
+    public ResponseEntity<Map<String, Object>>  findTodos(){
         Member member = memberService.getLoggedInMember();
-        return ResponseEntity.ok().body(todoService.findByMember_id(member.getId()));
+        List<selectDto> resultMap = todoService.findByMember_id(member.getId()).stream()
+                .map(todo -> selectDto.builder()
+                        .id(todo.getId())
+                        .content(todo.getContent())
+                        .completeYn(todo.getCompleteYn())
+                        .createdDate(todo.getCreatedDate())
+                        .build())// 원하는 값만 매핑
+                .collect(Collectors.toList());
+
+        Map<String,Object> result = new HashMap<>();
+        result.put("nickname", member.getNickname());
+        result.put("list",resultMap);
+        return ResponseEntity.ok().body(result);
     }
 
     @PostMapping("/todo/addTodo")

@@ -23,13 +23,14 @@ public class MemberService{
     private final MemberRepositoryImpl memberRepositoryImpl;
     private final PasswordEncoder passwordEncoder;  // PasswordEncoder 주입
 
-    public void signup(String username, String password){
+    public void signup(String username, String nickname, String password){
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(password);
 
         // 회원가입
         Member member = new Member();
         member.setUsername(username);
+        member.setNickname(nickname);
         member.setPassword(encodedPassword);
 
         memberRepository.save(member);

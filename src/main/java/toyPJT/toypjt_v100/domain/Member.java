@@ -20,6 +20,8 @@ public class Member implements UserDetails {
 
     private String username;
 
+    private String nickname;
+
     private String password;
 
 

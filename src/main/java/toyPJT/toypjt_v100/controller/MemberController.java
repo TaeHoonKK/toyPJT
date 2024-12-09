@@ -23,9 +23,10 @@ public class MemberController {
     @PostMapping("/user")
     public ResponseEntity<Map<String, Object>> signup(@RequestBody SignupRequest request){
 
-        if(!StringUtils.hasLength(request.getUsername()) || !StringUtils.hasLength(request.getPassword())){
+        if(!StringUtils.hasLength(request.getUsername()) || !StringUtils.hasLength(request.getPassword())
+        || !StringUtils.hasLength(request.getNickname())){
             Map<String, Object> result = new HashMap<>();
-            result.put("resultMessage", "아이디 혹은 비밀번호를 입력해주세요.");
+            result.put("resultMessage", "정보를 모두 입력해주세요.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
 
@@ -33,7 +34,7 @@ public class MemberController {
             //회원가입 시 아이디에 대한 중복여부 체크
             memberService.validationUserInfo(request.getUsername());
 
-            memberService.signup(request.getUsername(), request.getPassword());
+            memberService.signup(request.getUsername(), request.getNickname(), request.getPassword());
         } catch(Exception ex){
             Map<String, Object> result = new HashMap<>();
             result.put("resultMessage", ex.getMessage());
@@ -47,6 +48,7 @@ public class MemberController {
     @Getter @Setter
     static class SignupRequest{
         private String username;
+        private String nickname;
         private String password;
     }
 }

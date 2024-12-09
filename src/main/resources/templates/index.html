@@ -279,7 +279,8 @@
                 url: '/todo/selectAll',
                 method: 'GET',
                 success: function (response) {
-                    loadTasksWithDateComparison(response);
+                    $("#nickname").text(response.nickname + "님의 일정관리표");
+                    loadTasksWithDateComparison(response.list);
                 },
                 error: function (xhr, status, error) {
                     console.error('Failed to load tasks:', error);
@@ -451,8 +452,8 @@
 <body>
 
 <div class="header">
-    <h2>재미로 만든 일정관리표(by.TH)</h2>
-    <form action="/login" method="GET" style="margin: 0;">
+    <h2 id="nickname"></h2>
+    <form action="/logout" method="GET" style="margin: 0;">
         <button type="submit" class="logout-button">Logout</button>
     </form>
 </div>
